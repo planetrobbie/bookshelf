@@ -33,3 +33,6 @@ lib/
 /config.py
 
 .DS_Store
+
+*.jpeg
+*.jpg
