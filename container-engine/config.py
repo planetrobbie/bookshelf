@@ -74,6 +74,6 @@ SQLALCHEMY_DATABASE_URI = sql_template.substitute( \
 #
 # You can adjust the max content length and allow extensions settings to allow
 # larger or more varied file types if desired.
-CLOUD_STORAGE_BUCKET = bookshelf-k8s-demo
+CLOUD_STORAGE_BUCKET = "bookshelf-k8s-demo"
 MAX_CONTENT_LENGTH = 8 * 1024 * 1024
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
