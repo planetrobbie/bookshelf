@@ -18,22 +18,48 @@ Update this file with the values for your specific Google Cloud project.
 You can create and manage projects at https://console.developers.google.com
 """
 
+import hvac
+from string import Template
+
+# Get pod Token
+f = open('/var/run/secrets/kubernetes.io/serviceaccount/token')
+jwt = f.read()
+
+# Initialize the client
+client = hvac.Client()
+client = hvac.Client(url='http://vault-01.yet.org:8200')
+
+# k8s authenticate using token
+client.auth_kubernetes("k8s-role", jwt)
+
+# Get secrets
+secret = client.read('kv/bookshelf').get('data')
+
+# Logout
+client.logout()
+
 # There are two different ways to store the data in the application.
 # You can choose 'datastore', or 'cloudsql'. Be sure to
 # configure the respective settings for the one you choose below.
 # You do not have to configure the other data backend. If unsure, choose
 # 'datastore' as it does not require any additional configuration.
-DATA_BACKEND = 'datastore'
+DATA_BACKEND = 'cloudsql'
 
 # Google Cloud Project ID. This can be found on the 'Overview' page at
 # https://console.developers.google.com
-PROJECT_ID = 'sebbraun-yet'
+PROJECT_ID = secret.get('project_id')
 
 # SQLAlchemy configuration
 # Replace user, pass, host, and database with the respective values of your
 # Cloud SQL instance.
-SQLALCHEMY_DATABASE_URI = \
-    'mysql+pymysql://user:password@host/database'
+sql_template = \
+    Template("mysql+pymysql://$username:$password@$host/$database")
+
+SQLALCHEMY_DATABASE_URI = sql_template.substitute( \
+	                      username=secret.get('username'), \
+	                      password=secret.get('password'), \
+	                      host=secret.get('host'), \
+	                      database=secret.get('database'))
 
 # Google Cloud Storage and upload settings.
 # Typically, you'll name your bucket the same as your project. To create a
