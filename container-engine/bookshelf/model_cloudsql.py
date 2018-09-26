@@ -13,8 +13,8 @@
 # limitations under the License.
 
 from flask import Flask
-from flask.ext.sqlalchemy import SQLAlchemy
-
+#from flask.ext.sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 
 builtin_list = list
 
