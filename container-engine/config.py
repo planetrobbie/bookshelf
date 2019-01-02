@@ -27,7 +27,7 @@ jwt = f.read()
 
 # Initialize the client
 client = hvac.Client()
-client = hvac.Client(url='https://vault.prod.yet.org')
+client = hvac.Client(url='https://vault.prod.yet.org',verify='False')
 
 # k8s authenticate using token
 client.auth_kubernetes("k8s", jwt)
