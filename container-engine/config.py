@@ -35,6 +35,9 @@ client.auth_kubernetes("k8s-role", jwt)
 # Get secrets
 secret = client.read('kv/bookshelf').get('data')
 
+# Fetch a database credential from Vault DB endpoint
+creds = client.read('db/creds/dev').get('data')
+
 # Logout
 client.logout()
 
@@ -56,8 +59,8 @@ sql_template = \
     Template("mysql+pymysql://$username:$password@$host/$database")
 
 SQLALCHEMY_DATABASE_URI = sql_template.substitute( \
-	                      username=secret.get('username'), \
-	                      password=secret.get('password'), \
+	                      username=creds.get('username'), \
+	                      password=creds.get('password'), \
 	                      host=secret.get('host'), \
 	                      database=secret.get('database'))
 
