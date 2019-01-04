@@ -30,7 +30,7 @@ client = hvac.Client()
 client = hvac.Client(url='https://vault.prod.yet.org',verify=False)
 
 # k8s authenticate using token
-client.auth_kubernetes("k8s-role", jwt)
+auth = client.auth_kubernetes("k8s-role", jwt)
 
 # Get secrets
 secret = client.read('kv/bookshelf').get('data')
@@ -38,12 +38,18 @@ secret = client.read('kv/bookshelf').get('data')
 # Fetch a database credential from Vault DB endpoint
 creds = client.read('db/creds/dev')
 
-# Fetch corresponding data and lease_id
+# Fetch corresponding client_token, data and lease_id
+vault_token = auth.get('auth').get('client_token')
 creds_data = creds.get('data')
 creds_lease_id = creds.get('lease_id')
 
 # Logout
 client.logout()
+
+# Store vault token for sidecar renewal
+vault_token_file = open("/vault_token", mode="w")
+vault_token_file.write(vault_token)
+vault_token_file.close()
 
 # Store lease_id for sidecar renewal
 creds_lease_id_file = open("/lease_id", mode="w")
