@@ -46,7 +46,7 @@ creds_lease_id = creds.get('lease_id')
 client.logout()
 
 # Store lease_id for sidecar renewal
-creds_lease_id_file = open("/lease_id",mode="w",encoding="utf-8")
+creds_lease_id_file = open("/lease_id", mode="w")
 creds_lease_id_file.write(creds_lease_id)
 creds_lease_id_file.close()
 
