@@ -7,4 +7,4 @@ gcloud==0.18.1
 gunicorn==19.6.0
 six==1.10.0
 honcho==0.7.1
-hvac==0.6.4
+hvac==0.7.2

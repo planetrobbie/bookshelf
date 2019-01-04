@@ -36,10 +36,19 @@ client.auth_kubernetes("k8s-role", jwt)
 secret = client.read('kv/bookshelf').get('data')
 
 # Fetch a database credential from Vault DB endpoint
-creds = client.read('db/creds/dev').get('data')
+creds = client.read('db/creds/dev')
+
+# Fetch corresponding data and lease_id
+creds_data = creds.get('data')
+creds_lease_id = creds.get('lease_id')
 
 # Logout
 client.logout()
+
+# Store lease_id for sidecar renewal
+creds_lease_id_file = open("/lease_id",mode="w",encoding="utf-8")
+creds_lease_id_file.write(creds_lease_id)
+creds_lease_id_file.close()
 
 # There are two different ways to store the data in the application.
 # You can choose 'datastore', or 'cloudsql'. Be sure to
@@ -59,8 +68,8 @@ sql_template = \
     Template("mysql+pymysql://$username:$password@$host/$database")
 
 SQLALCHEMY_DATABASE_URI = sql_template.substitute( \
-	                      username=creds.get('username'), \
-	                      password=creds.get('password'), \
+	                      username=creds_data.get('username'), \
+	                      password=creds_data.get('password'), \
 	                      host=secret.get('host'), \
 	                      database=secret.get('database'))
 
