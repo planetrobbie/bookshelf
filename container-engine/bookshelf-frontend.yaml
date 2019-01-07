@@ -50,7 +50,37 @@ spec:
         # The bookshelf process listens on port 8080 for web traffic by default.
         ports:
         - containerPort: 8080
-
+        volumeMounts:
+          - name: vault-assets
+            mountPath: /etc/vault-assets
+      - name: renewer-sidecar
+        image: giantswarm/tiny-tools
+        command:
+          - "sh"
+          - "-c"
+          - >
+            X_VAULT_TOKEN=$(cat /etc/vault-assets/vault_token);
+            VAULT_LEASE_ID=$(cat /etc/vault-assets/lease_id);
+            while true; do
+              curl -sS -k -X PUT -H "X-Vault-Token: $X_VAULT_TOKEN" --data '{"lease_id": "'"$VAULT_LEASE_ID"'", "increment": 3600}' https://vault.prod.yet.org/v1/sys/leases/renew;
+              sleep 3480;
+            done
+        lifecycle:
+          preStop:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - >
+                  X_VAULT_TOKEN=$(cat /etc/vault-assets/vault_token);
+                  VAULT_LEASE_ID=$(cat /etc/vault-assets/lease_id);
+                  curl -sS -k -X PUT -H "X-Vault-Token: $X_VAULT_TOKEN" --data '{"lease_id": "'"$VAULT_LEASE_ID"'"}' https://vault.prod.yet.org/v1/sys/leases/revoke;
+        volumeMounts:
+          - name: vault-assets
+            mountPath: /etc/vault-assets
+      volumes:
+        - name: vault-assets
+          emptyDir: {}
 ---
 
 # The bookshelf service provides a load-balancing proxy over the bookshelf app
